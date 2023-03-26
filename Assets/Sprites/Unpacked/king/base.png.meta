@@ -225,7 +225,7 @@ TextureImporter:
       name: base_5
       rect:
         serializedVersion: 2
-        x: 234
+        x: 235
         y: 336
         width: 24
         height: 26
@@ -606,7 +606,7 @@ TextureImporter:
         x: 233
         y: 288
         width: 30
-        height: 32
+        height: 26
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}

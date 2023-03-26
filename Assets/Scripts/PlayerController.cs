@@ -5,28 +5,30 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    // Start is called before the first frame update
+    [Header("Stats")]
     public float speed = 3;
     public float jumpHeight = 10;
-    public float minJumpTime = 0.1f;
-    public float maxJumpTime = 1.5f;
+    public float minJumpTime = 0.2f;
+    public float maxJumpTime = 0.8f;
     public float jumpSpeedMultiplier = 4f;
     public float reflectForce = 1.5f;
+    public float fallingSpeedLimit = -15f;
 
+    [Header("Pre-Assignments")]
     public Transform groundCheck;
     public LayerMask groundLayer;
     public Vector2 groundSize = new Vector2(0.3f, .1f);
     public Collider2D wallCollider;
 
-
     float vx,spvx;
     bool isGrounded, wasGrounded, isJumping, canMove = true;
-    bool rightFlag;
+    bool rightFlag, fulljump;
     float jumpTimeout;
 
     Rigidbody2D rbody;
     SpriteRenderer sprite;
     Animator anim;
+
     void Start()
     {
         rbody = GetComponent<Rigidbody2D>();
@@ -68,9 +70,14 @@ public class PlayerController : MonoBehaviour
                 rbody.velocity = Vector2.zero;
                 isJumping = true;
                 canMove = false;
+                if (jumpTimeout >= maxJumpTime)
+                {
+                    fulljump = true;
+                }
             }
-            if (Input.GetKeyUp("space"))
+            if (Input.GetKeyUp("space") || fulljump == true)
             {
+                fulljump = false;
                 wallCollider.enabled = true;
                 if (spvx < 0)
                     rightFlag = false; //점프 눌렀을떄 방향
@@ -91,9 +98,14 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        float yVel = Mathf.Abs(rbody.velocity.y);
-        if (yVel <= 0.01f)
+        float yVel = rbody.velocity.y;
+        if (Mathf.Abs(yVel) <= 0.01f)
             yVel = 0f; //잠깐 움직이기 방지
+
+        if (yVel < fallingSpeedLimit)
+        {
+            rbody.velocity = new Vector2(rbody.velocity.x, fallingSpeedLimit);
+        }
 
         if (canMove && yVel == 0f)
         {
@@ -106,7 +118,7 @@ public class PlayerController : MonoBehaviour
     {
         if (!canMove && collision.otherCollider == wallCollider)
         {
-            rbody.AddForce(collision.contacts[0].normal * reflectForce, ForceMode2D.Impulse);
+            rbody.AddForce(collision.contacts[0].normal * reflectForce + Vector2.up * (reflectForce/2), ForceMode2D.Impulse);
         }
     }
 
